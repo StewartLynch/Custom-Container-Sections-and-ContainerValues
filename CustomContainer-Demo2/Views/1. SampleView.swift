@@ -19,7 +19,7 @@ import SwiftUI
 struct SampleView: View {
     var body: some View {
         NavigationStack {
-            List {
+            CustomListContainer {
                 Section("First Section") {
                     Text("One")
                     Text("Two")
@@ -52,6 +52,7 @@ struct SampleView: View {
 #Preview {
     SampleView()
 }
+
 
 
 
