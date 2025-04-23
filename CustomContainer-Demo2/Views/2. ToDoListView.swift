@@ -19,22 +19,40 @@ import SwiftUI
 
 struct ToDoListView: View {
     @State private var allToDos = ToDo.mockToDos
+    @State private var selectedProject: Project = .swiftUIApp
+    var groupedToDos: [Project : [ToDo]] {
+        Dictionary(grouping: allToDos) { $0.project }
+    }
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(allToDos){ toDo in
-                    HStack {
-                        Button {
-                            if let index = allToDos.firstIndex(where: {$0.id == toDo.id}) {
-                                allToDos[index].completed.toggle()
-                            }
-                        } label: {
-                            Image(systemName: toDo.completed ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(toDo.completed ? .green : .gray)
-                        }
-                        .buttonStyle(.plain)
-                        Text(toDo.item)
+            LabeledContent("Priority") {
+                Picker("Select a Project", selection: $selectedProject) {
+                    ForEach(Project.allCases) { project in
+                        Text(project.displayName).tag(project)
                     }
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding(.horizontal)
+            ProjectContainerView(selectedProject: $selectedProject) {
+                ForEach(Project.allCases) { project in
+                    Section(project.displayName ){
+                        ForEach(groupedToDos[project] ?? []){ toDo in
+                            HStack {
+                                Button {
+                                    if let index = allToDos.firstIndex(where: {$0.id == toDo.id}) {
+                                        allToDos[index].completed.toggle()
+                                    }
+                                } label: {
+                                    Image(systemName: toDo.completed ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(toDo.completed ? .green : .gray)
+                                }
+                                .buttonStyle(.plain)
+                                Text(toDo.item)
+                            }
+                        }
+                    }
+                    .containerValue(\.topPriority, project == selectedProject)
                 }
             }
             .listStyle(.plain)
